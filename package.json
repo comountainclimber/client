@@ -21,7 +21,7 @@
     "about-window": "1.12.1",
     "bignumber.js": "8.0.1",
     "classnames": "2.2.6",
-    "connected-react-router": "5.0.1",
+    "connected-react-router": "6.1.0",
     "ejs": "2.6.1",
     "electron-context-menu": "0.10.1",
     "electron-is-dev": "0.3.0",
