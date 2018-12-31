@@ -47,7 +47,7 @@
     "react-sticky": "6.0.3",
     "recharts": "1.4.2",
     "recompose": "0.30.0",
-    "redux": "3.7.2",
+    "redux": "4.0.1",
     "redux-saga": "0.16.2",
     "redux-thunk": "2.3.0",
     "sifter": "0.5.3",
