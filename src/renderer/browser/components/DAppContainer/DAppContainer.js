@@ -1,7 +1,7 @@
 import path from 'path';
 import React from 'react';
 import classNames from 'classnames';
-import { bool, string, func } from 'prop-types';
+import { bool, string, func, number } from 'prop-types';
 import { noop } from 'lodash';
 
 import getStaticPath from '../../../util/getStaticPath';
@@ -26,14 +26,15 @@ export default class DAppContainer extends React.PureComponent {
     empty: func.isRequired,
     openTab: func.isRequired,
     closeTab: func.isRequired,
-    onFocus: func // eslint-disable-line react/no-unused-prop-types
-  }
+    requestCount: number.isRequired,
+    onFocus: func
+  };
 
   static defaultProps = {
     className: null,
     active: false,
     onFocus: noop
-  }
+  };
 
   async componentDidMount() {
     window.addEventListener('focus', this.handleWindowFocus);
@@ -101,11 +102,7 @@ export default class DAppContainer extends React.PureComponent {
 
   renderWebView() {
     return (
-      <webview
-        ref={this.registerRef}
-        preload={this.getPreloadPath()}
-        className={styles.webview}
-      />
+      <webview ref={this.registerRef} preload={this.getPreloadPath()} className={styles.webview} />
     );
   }
 
@@ -120,15 +117,15 @@ export default class DAppContainer extends React.PureComponent {
         onReject={this.handleReject}
       />
     );
-  }
+  };
 
   handleWindowFocus = () => {
     this.webview.focus();
-  }
+  };
 
   handleDomReady = () => {
     this.focusAndNotify();
-  }
+  };
 
   handleIPCMessage = (event) => {
     switch (event.channel) {
@@ -138,7 +135,7 @@ export default class DAppContainer extends React.PureComponent {
       default:
         this.handleIPCAPI(event);
     }
-  }
+  };
 
   handleIPCZoom = (event) => {
     const difference = event.args[0] > 0 ? -0.5 : 0.5;
@@ -146,7 +143,7 @@ export default class DAppContainer extends React.PureComponent {
     this.webview.getZoomLevel((zoomLevel) => {
       this.webview.setZoomLevel(zoomLevel + difference);
     });
-  }
+  };
 
   handleIPCAPI = (event) => {
     const { channel } = event;
@@ -154,74 +151,79 @@ export default class DAppContainer extends React.PureComponent {
     const args = event.args.slice(1);
 
     this.props.enqueue(this.props.sessionId, { channel, id, args });
-  }
+  };
 
   handlePageTitleUpdated = (event) => {
     this.props.setTabTitle(this.props.sessionId, event.title);
-  }
+  };
 
   handlePageIconUpdated = async (event) => {
     this.props.setTabIcon(this.props.sessionId, await fetchBestIcon(event.favicons));
-  }
+  };
 
   handleNavigatingToPage = (event) => {
     this.props.setTabTarget(this.props.sessionId, event.url);
-  }
+  };
 
   handleNavigatedToPage = (event) => {
     this.props.setTabTarget(this.props.sessionId, event.url);
-  }
+  };
 
   handleNavigatedToAnchor = (event) => {
     if (event.isMainFrame) {
       this.props.setTabTarget(this.props.sessionId, event.url);
     }
-  }
+  };
 
   handleNavigateFailed = (event) => {
     if (event.isMainFrame) {
-      this.webview.send('did-fail-load', event.validatedURL, event.errorCode, event.errorDescription);
+      this.webview.send(
+        'did-fail-load',
+        event.validatedURL,
+        event.errorCode,
+        event.errorDescription
+      );
     }
-  }
+  };
 
   handleLoading = () => {
     this.props.setTabLoaded(this.props.sessionId, false);
-  }
+  };
 
   handleLoaded = () => {
     this.props.setTabLoaded(this.props.sessionId, true);
-  }
+  };
 
   handleNewWindow = (event) => {
     this.props.openTab({ target: event.url });
-  }
+  };
 
   handleCloseWindow = () => {
     this.props.closeTab(this.props.sessionId);
-  }
+  };
 
   handleResolve = (request, result) => {
     const { channel, id } = request;
     this.webview.send(`${channel}-success-${id}`, result);
     this.props.dequeue(this.props.sessionId, id);
-  }
+  };
 
   handleReject = (request, message) => {
     const { channel, id } = request;
     this.webview.send(`${channel}-failure-${id}`, message);
     this.props.dequeue(this.props.sessionId, id);
-  }
+  };
 
   registerRef = (el) => {
     this.webview = el;
-  }
+  };
 
   getPreloadPath = () => {
     return `file:${path.join(getStaticPath(), 'preloadRenderer.js')}`;
-  }
+  };
 
   focusAndNotify = () => {
     this.webview.focus();
     this.props.onFocus(this.webview.getWebContents().getId());
-  }
+  };
 }

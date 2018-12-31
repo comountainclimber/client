@@ -8,17 +8,14 @@ import styles from './LoginButton.scss';
 
 const LoginButton = ({ disabled }) => (
   <div className={styles.loginButton}>
-    <PrimaryButton
-      type="submit"
-      disabled={disabled}
-    >
+    <PrimaryButton type="submit" disabled={disabled}>
       Login
     </PrimaryButton>
     <span className={styles.register}>
-            New to nOS?{' '}
-      <Link to="/register">Create an account</Link>
+      New to nOS? <Link to="/register">Create an account</Link>
     </span>
-  </div>);
+  </div>
+);
 
 LoginButton.propTypes = {
   disabled: bool
